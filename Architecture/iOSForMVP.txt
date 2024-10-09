@@ -1,0 +1,52 @@
+// Model 
+struct Sample {
+  let name: String
+}
+
+protocol SampleRepository {
+  func fetchSample(completion: @escaping (Sample) -> Void)
+}
+
+// View
+protocol SampleView: AnyObject {
+  func showSampleName(name: String)
+}
+
+
+class SampleViewController: UIViewController, SampleView {
+
+  @IBOutlet weak var nameLabel: UILabel!
+  var presenter: SamplePresenter!
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    presenter.viewDidLoad()
+  }
+
+  func showSampleName(name: String) {
+    nameLabel.text = name
+  }
+}
+
+
+// Presenter
+protocol SamplePresentation {
+  func viewDidLoad()
+}
+
+class SamplePresenter: SamplePresentation {
+
+  private weak var view: SampleView?
+  private let repository: SampleRepository
+
+  init(view: SampleView, repository: SampleRepository) {
+    self.view = view
+    self.repository = repository
+  }
+
+  func viewDidLoad() {
+    repository.fetchSample { [weak self] sample in
+      self?.view?.showSampleName(name: sample.name)
+    }
+  }
+}
